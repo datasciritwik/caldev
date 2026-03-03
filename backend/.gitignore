@@ -1,0 +1,8 @@
+.venv
+.env
+__pycache__
+*.xml
+*.txt
+keys
+*.json
+.pytest_cache
