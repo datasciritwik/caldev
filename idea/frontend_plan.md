@@ -12,8 +12,13 @@
 
 ### A. App Shell
 
-- `Sidebar / Navbar`: Global navigation switching between Projects, Calendar, and People views.
-- `ProjectSelector`: Dropdown mapping to active `project_id`.
+- **Theme & Icons:** "Glowing Horizon" color palette with FontAwesome icons for a universally easy UI.
+- `TopNavBar`: Global sticky header spanning the full width. Available globally.
+  - **Left:** Global `ProjectSelector` dropdown and a prominent `[ + New Project ]` button.
+  - **Center:** Main navigation tabs (`Projects`, `Tree Planner`, `Calendar`, `People`).
+  - **Right:** Notification bell icon and User Profile avatar.
+- `Workspace Container`: Takes up the middle area of the screen where view content is rendered.
+- `StatusLegend`: A persistent subtle bar or overlay at the bottom of the screen (visible in Tree and Calendar views) mapping colors to statuses (e.g., Gray = Not Started, Blue = In Progress, Green = Done).
 
 ### B. Projects View
 
@@ -29,7 +34,7 @@
   - Can recursively render its `children[]`.
   - Visuals: Connectors between parents and children (e.g., via CSS pseudo-elements `::before/::after`).
   - Interactions: Expand/Collapse toggle, Hover actions (Add Child, Delete, Convert to Task).
-- `NodeForm`: Allows assigning an Owner (`person_id`), title, and description.
+- `NodeForm`: Allows assigning an Owner (`owner_id`), title, and description.
 - _Conversion:_ Only "Leaf" nodes (no children) expose the "Convert to Task" button.
 
 ### D. Calendar View (The Execution Mode)
@@ -42,17 +47,17 @@
 - `OverduePanel`: Explicitly listing tasks where `due_date < today` and `status == Pending`.
 - _Note:_ The Calendar must exclusively render `Tasks` and never generic `Nodes`.
 
-### E. People View (Responsibility Mode)
+### E. People / Users View (Responsibility Mode)
 
 - **Concept:** Overview for accountability.
 - `PeopleGrid`: List showing each user's capacity.
-- `PersonCard`:
+- `UserCard`:
   - Splits responsibilities into two column lists: Assigned Nodes (Thinking) and Assigned Tasks (Execution).
-  - Fetched using specific API mappings (e.g., `/api/persons/{id}/responsibilities`).
+  - Fetched using specific API mappings (e.g., `/api/users/{id}/responsibilities`).
 
 ## 3. Global State & Context Needed
 
-- `AuthContext`: Tracks current logged-in user to stamp `owner_id` or `assigned_to` on actions.
+- `AuthContext`: Manages Firebase authentication state and JWT tokens. Tracks current logged-in user to stamp `owner_id` or `assigned_to` on actions.
 - `ProjectContext`: Holds the active `Project` context so the Roadmap and Calendar know what to fetch.
 - `DateContext`: Holds the active Month/Year for the calendar view navigation.
 

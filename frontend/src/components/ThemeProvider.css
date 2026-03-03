@@ -1,0 +1,21 @@
+/* 
+  ThemeProvider.css
+  This file ensures that the ThemeProvider wrapper doesn't interfere with the layout 
+  of the application, while still passing down the CSS variables.
+*/
+
+.theme-provider-wrapper {
+  /* display: contents prevents the wrapper from affecting flexbox or grid layouts */
+  display: contents;
+
+  /* Apply our base theme styles by default */
+  color: var(--color-text);
+  background-color: var(--color-background);
+}
+
+/* Optional: Add some global typography defaults based on the theme */
+body {
+  font-family: "Inter", "Roboto", "Outfit", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

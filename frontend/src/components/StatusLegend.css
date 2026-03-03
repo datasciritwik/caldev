@@ -1,0 +1,57 @@
+.status-legend-container {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+}
+
+.status-legend {
+  display: flex;
+  gap: 24px;
+  background-color: var(--color-background); /* often white */
+  padding: 10px 24px;
+  border-radius: 30px; /* Pill shape */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid #eaeaea;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Colors mapped from Glowing Horizon and statuses */
+.status-not-started {
+  background-color: transparent;
+  border: 2px solid #ccc;
+  box-sizing: border-box;
+}
+
+.status-in-progress {
+  background-color: var(--color-primary); /* #4272FF - Blue */
+  box-shadow: 0 0 6px rgba(66, 114, 255, 0.4);
+}
+
+.status-done {
+  background-color: var(--color-secondary); /* #42EAFF - Cyan */
+  box-shadow: 0 0 6px rgba(66, 234, 255, 0.4);
+}
+
+.status-overdue {
+  background-color: var(--color-danger); /* #FF7E42 - Orange */
+  box-shadow: 0 0 6px rgba(255, 126, 66, 0.4);
+}
