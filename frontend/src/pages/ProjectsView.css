@@ -79,5 +79,5 @@
 
 .project-actions button:hover {
   background-color: var(--color-primary);
-  color: white;
+  color: rgb(17, 17, 17);
 }
