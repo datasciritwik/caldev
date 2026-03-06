@@ -15,7 +15,10 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
 
@@ -31,6 +34,24 @@ export const AuthProvider = ({ children }) => {
     return config;
   });
 
+  const saveAuth = (newToken, newUser) => {
+    if (newToken) {
+      localStorage.setItem('token', newToken);
+      setToken(newToken);
+    }
+    if (newUser) {
+      localStorage.setItem('user', JSON.stringify(newUser));
+      setUser(newUser);
+    }
+  };
+
+  const clearAuth = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setToken(null);
+    setUser(null);
+  };
+
   const loginWithGoogle = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
@@ -40,9 +61,7 @@ export const AuthProvider = ({ children }) => {
       const response = await api.post('/api/auth/token', { id_token: idToken });
       const { access_token, user: backendUser } = response.data;
       
-      localStorage.setItem('token', access_token);
-      setToken(access_token);
-      setUser(backendUser);
+      saveAuth(access_token, backendUser);
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
@@ -55,9 +74,7 @@ export const AuthProvider = ({ children }) => {
       const idToken = await result.user.getIdToken();
       const response = await api.post('/api/auth/token', { id_token: idToken });
       const { access_token, user: backendUser } = response.data;
-      localStorage.setItem('token', access_token);
-      setToken(access_token);
-      setUser(backendUser);
+      saveAuth(access_token, backendUser);
     } catch (error) {
       console.error("Email login failed:", error);
       throw error;
@@ -71,9 +88,7 @@ export const AuthProvider = ({ children }) => {
       const idToken = await result.user.getIdToken();
       const response = await api.post('/api/auth/token', { id_token: idToken });
       const { access_token, user: backendUser } = response.data;
-      localStorage.setItem('token', access_token);
-      setToken(access_token);
-      setUser(backendUser);
+      saveAuth(access_token, backendUser);
     } catch (error) {
       console.error("Email registration failed:", error);
       throw error;
@@ -82,43 +97,48 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     await signOut(auth);
-    localStorage.removeItem('token');
-    setToken(null);
-    setUser(null);
+    clearAuth();
   };
 
   useEffect(() => {
+    const initAuth = async () => {
+      if (token) {
+        try {
+          // Verify current token and get fresh user profile
+          const response = await api.get('/api/auth/me');
+          saveAuth(token, response.data);
+        } catch (e) {
+          console.error("Session expired or invalid:", e);
+          clearAuth();
+        }
+      }
+      setLoading(false);
+    };
+
+    initAuth();
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         // If we have a firebase user but no backend user/token, try to re-exchange
-        if (!token) {
+        if (!localStorage.getItem('token')) {
           try {
             const idToken = await firebaseUser.getIdToken();
             const response = await api.post('/api/auth/token', { id_token: idToken });
             const { access_token, user: backendUser } = response.data;
-            localStorage.setItem('token', access_token);
-            setToken(access_token);
-            setUser(backendUser);
+            saveAuth(access_token, backendUser);
           } catch (e) {
             console.error("Failed to sync auth state:", e);
-            setUser(null);
-            setToken(null);
+            clearAuth();
           }
-        } else if (!user) {
-          // In a real app, you might fetch user details from /api/me here
-          // For now, we'll assume the token is enough or handle it in specific components
-          setLoading(false);
         }
       } else {
-        setUser(null);
-        setToken(null);
-        localStorage.removeItem('token');
+        // If Firebase is signed out, clear everything
+        clearAuth();
       }
-      setLoading(false);
     });
 
     return unsubscribe;
-  }, [token]);
+  }, []);
 
   const value = {
     user,

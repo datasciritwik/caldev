@@ -2,7 +2,7 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends
 from beanie import PydanticObjectId
 from pydantic import BaseModel
-from src.models.models import Node, Task
+from src.models.models import Node, Task, NodeStatus
 from src.auth.security import get_current_user_id
 
 router = APIRouter(prefix="/api/projects/{project_id}/nodes", tags=["Nodes"])
@@ -10,10 +10,12 @@ router = APIRouter(prefix="/api/projects/{project_id}/nodes", tags=["Nodes"])
 class NodeCreate(BaseModel):
     parent_node_id: Optional[PydanticObjectId] = None
     title: str
-    description: Optional[str] = None
+    description: Optional[str] = ""
     owner_id: Optional[PydanticObjectId] = None
+    status: Optional[NodeStatus] = NodeStatus.NOT_STARTED
+    checklist: Optional[List[dict]] = []
 
-@router.get("/")
+@router.get("")
 async def get_project_nodes(project_id: PydanticObjectId, user_id: str = Depends(get_current_user_id)):
     nodes = await Node.find(Node.project_id == project_id).to_list()
     
@@ -36,7 +38,7 @@ async def get_project_nodes(project_id: PydanticObjectId, user_id: str = Depends
             
     return tree
 
-@router.post("/", response_model=Node)
+@router.post("", response_model=Node)
 async def create_node(project_id: PydanticObjectId, node: NodeCreate, user_id: str = Depends(get_current_user_id)):
     new_node = Node(project_id=project_id, **node.model_dump())
     await new_node.insert()
@@ -46,7 +48,8 @@ class NodeUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     owner_id: Optional[PydanticObjectId] = None
-    status: Optional[str] = None
+    status: Optional[NodeStatus] = None
+    checklist: Optional[List[dict]] = None
 
 @router.put("/{id}", response_model=Node)
 async def update_node(project_id: PydanticObjectId, id: PydanticObjectId, update_data: NodeUpdate, user_id: str = Depends(get_current_user_id)):

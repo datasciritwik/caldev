@@ -51,9 +51,10 @@ class Node(Document):
     project_id: PydanticObjectId
     parent_node_id: Optional[PydanticObjectId] = None
     title: str
-    description: Optional[str] = None
+    description: Optional[str] = ""
     owner_id: Optional[PydanticObjectId] = None  # References User
-    status: NodeStatus = NodeStatus.NOT_STARTED
+    status: Optional[NodeStatus] = NodeStatus.NOT_STARTED
+    checklist: Optional[List[dict]] = []  # List of {id, text, completed}
     task_id: Optional[PydanticObjectId] = None
 
     class Settings:

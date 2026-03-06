@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from src.auth.security import verify_firebase_token, create_access_token
+from src.auth.security import verify_firebase_token, create_access_token, get_current_user_id
 from src.models.models import User
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
@@ -41,3 +41,10 @@ async def exchange_token(req: TokenExchangeReq):
         "token_type": "bearer",
         "user": user
     }
+
+@router.get("/me", response_model=User)
+async def get_me(user_id: str = Depends(get_current_user_id)):
+    user = await User.get(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
