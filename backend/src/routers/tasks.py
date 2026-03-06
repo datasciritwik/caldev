@@ -1,9 +1,10 @@
 from typing import List, Optional
 from datetime import datetime
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from beanie import PydanticObjectId
 from pydantic import BaseModel
 from src.models.models import Task, Node, TaskStatus
+from src.auth.security import get_current_user_id
 
 router = APIRouter(prefix="/api/tasks", tags=["Tasks"])
 
@@ -14,7 +15,7 @@ class TaskCreateReq(BaseModel):
     priority: Optional[int] = None
 
 @router.post("/", response_model=Task)
-async def create_task_from_node(req: TaskCreateReq):
+async def create_task_from_node(req: TaskCreateReq, user_id: str = Depends(get_current_user_id)):
     node = await Node.get(req.node_id)
     if not node:
         raise HTTPException(status_code=404, detail="Node not found")
@@ -43,7 +44,7 @@ async def create_task_from_node(req: TaskCreateReq):
     return new_task
 
 @router.get("/calendar")
-async def get_calendar_tasks(project_id: Optional[PydanticObjectId] = None):
+async def get_calendar_tasks(project_id: Optional[PydanticObjectId] = None, user_id: str = Depends(get_current_user_id)):
     query = Task.find(Task.project_id == project_id) if project_id else Task.find_all()
     tasks = await query.to_list()
     
@@ -57,7 +58,7 @@ async def get_calendar_tasks(project_id: Optional[PydanticObjectId] = None):
     return calendar
 
 @router.get("/", response_model=List[Task])
-async def list_tasks(project_id: Optional[PydanticObjectId] = None, assigned_to: Optional[PydanticObjectId] = None):
+async def list_tasks(project_id: Optional[PydanticObjectId] = None, assigned_to: Optional[PydanticObjectId] = None, user_id: str = Depends(get_current_user_id)):
     query = {}
     if project_id:
         query["project_id"] = project_id
@@ -71,7 +72,7 @@ class TaskUpdate(BaseModel):
     due_date: Optional[datetime] = None
 
 @router.put("/{id}", response_model=Task)
-async def update_task(id: PydanticObjectId, update_data: TaskUpdate):
+async def update_task(id: PydanticObjectId, update_data: TaskUpdate, user_id: str = Depends(get_current_user_id)):
     task = await Task.get(id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")

@@ -14,7 +14,7 @@ async def get_me(user_id: str = Depends(get_current_user_id)):
     return user
 
 @router.get("/search", response_model=List[User])
-async def search_users(q: str):
+async def search_users(q: str, user_id: str = Depends(get_current_user_id)):
     # Case insensitive search on username or email
     users = await User.find({
         "$or": [
@@ -26,7 +26,7 @@ async def search_users(q: str):
     return users
 
 @router.get("/{id}/responsibilities")
-async def get_user_responsibilities(id: PydanticObjectId):
+async def get_user_responsibilities(id: PydanticObjectId, user_id: str = Depends(get_current_user_id)):
     user = await User.get(id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

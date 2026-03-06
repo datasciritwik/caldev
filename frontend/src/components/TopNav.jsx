@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBell, faUserCircle, faPlus, faProjectDiagram, faCalendarAlt, faUsers, faList } from '@fortawesome/free-solid-svg-icons';
+import { faBell, faUserCircle, faPlus, faProjectDiagram, faCalendarAlt, faUsers, faList, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { useAuth } from '../context/AuthContext';
 import './TopNav.css';
 
 const TopNav = () => {
+  const { user, logout } = useAuth();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+
   return (
     <header className="top-nav">
       
@@ -58,12 +62,36 @@ const TopNav = () => {
       <div className="top-nav-zone right-zone">
         <button className="icon-btn notification-btn" aria-label="Notifications">
           <FontAwesomeIcon icon={faBell} />
-          {/* Badge example */}
           <span className="notification-badge">3</span>
         </button>
-        <button className="icon-btn profile-btn" aria-label="User Profile">
-          <FontAwesomeIcon icon={faUserCircle} className="avatar-icon" />
-        </button>
+        
+        <div className="profile-container">
+          <button 
+            className="icon-btn profile-btn" 
+            aria-label="User Profile"
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+          >
+            {user?.avatar_url ? (
+              <img src={user.avatar_url} alt={user.username} className="avatar-img" />
+            ) : (
+              <FontAwesomeIcon icon={faUserCircle} className="avatar-icon" />
+            )}
+          </button>
+          
+          {showProfileMenu && (
+            <div className="profile-dropdown">
+              <div className="user-info">
+                <span className="username">{user?.username}</span>
+                <span className="email">{user?.email}</span>
+              </div>
+              <hr />
+              <button className="logout-btn" onClick={logout}>
+                <FontAwesomeIcon icon={faSignOutAlt} />
+                <span>Logout</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
     </header>

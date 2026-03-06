@@ -17,6 +17,7 @@ class User(Document):
     firebase_uid: str = Field(json_schema_extra={"unique": True, "index": True})
     email: str = Field(json_schema_extra={"unique": True, "index": True})
     username: str = Field(json_schema_extra={"unique": True, "index": True})
+    avatar_url: Optional[str] = None
     role: Optional[str] = None
 
     class Settings:

@@ -1,0 +1,17 @@
+:root {
+  /* Glowing Horizon Palette */
+  --bg-deep: #0a0b10;
+  --bg-card: #161821;
+  --text-main: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.6);
+  
+  --accent: #4272FF;
+  --accent-secondary: #42EAFF;
+  --accent-gradient: linear-gradient(135deg, #4272FF 0%, #42EAFF 100%);
+  
+  --success: #00e676;
+  --warning: #ffd600;
+  --danger: #ff5252;
+  
+  --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+}

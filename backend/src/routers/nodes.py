@@ -1,8 +1,9 @@
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from beanie import PydanticObjectId
 from pydantic import BaseModel
 from src.models.models import Node, Task
+from src.auth.security import get_current_user_id
 
 router = APIRouter(prefix="/api/projects/{project_id}/nodes", tags=["Nodes"])
 
@@ -13,7 +14,7 @@ class NodeCreate(BaseModel):
     owner_id: Optional[PydanticObjectId] = None
 
 @router.get("/")
-async def get_project_nodes(project_id: PydanticObjectId):
+async def get_project_nodes(project_id: PydanticObjectId, user_id: str = Depends(get_current_user_id)):
     nodes = await Node.find(Node.project_id == project_id).to_list()
     
     node_dict = {str(n.id): n.model_dump() for n in nodes}
@@ -36,7 +37,7 @@ async def get_project_nodes(project_id: PydanticObjectId):
     return tree
 
 @router.post("/", response_model=Node)
-async def create_node(project_id: PydanticObjectId, node: NodeCreate):
+async def create_node(project_id: PydanticObjectId, node: NodeCreate, user_id: str = Depends(get_current_user_id)):
     new_node = Node(project_id=project_id, **node.model_dump())
     await new_node.insert()
     return new_node
@@ -48,7 +49,7 @@ class NodeUpdate(BaseModel):
     status: Optional[str] = None
 
 @router.put("/{id}", response_model=Node)
-async def update_node(project_id: PydanticObjectId, id: PydanticObjectId, update_data: NodeUpdate):
+async def update_node(project_id: PydanticObjectId, id: PydanticObjectId, update_data: NodeUpdate, user_id: str = Depends(get_current_user_id)):
     node = await Node.get(id)
     if not node:
         raise HTTPException(status_code=404, detail="Node not found")
@@ -56,7 +57,7 @@ async def update_node(project_id: PydanticObjectId, id: PydanticObjectId, update
     return node
 
 @router.delete("/{id}")
-async def delete_node(project_id: PydanticObjectId, id: PydanticObjectId):
+async def delete_node(project_id: PydanticObjectId, id: PydanticObjectId, user_id: str = Depends(get_current_user_id)):
     node = await Node.get(id)
     if not node:
         raise HTTPException(status_code=404, detail="Node not found")

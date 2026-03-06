@@ -15,6 +15,7 @@ async def exchange_token(req: TokenExchangeReq):
     
     firebase_uid = decoded_firebase_user.get("uid")
     email = decoded_firebase_user.get("email")
+    avatar_url = decoded_firebase_user.get("picture")
     # For username, we can use display_name or part of email
     username = decoded_firebase_user.get("name") or email.split("@")[0]
 
@@ -24,9 +25,13 @@ async def exchange_token(req: TokenExchangeReq):
         user = User(
             firebase_uid=firebase_uid,
             email=email,
-            username=username
+            username=username,
+            avatar_url=avatar_url
         )
         await user.insert()
+    elif user.avatar_url != avatar_url:
+        user.avatar_url = avatar_url
+        await user.save()
     
     # 3. Issue Backend JWT
     access_token = create_access_token(data={"sub": str(user.id)})
